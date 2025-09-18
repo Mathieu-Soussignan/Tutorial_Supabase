@@ -1,0 +1,30 @@
+# Créer le fichier .gitignore
+cat > .gitignore << 'EOF'
+# === ENVIRONNEMENT VIRTUEL ===
+venv/
+env/
+ENV/
+.venv/
+
+# === SECRETS ===
+.env
+.env.local
+.env.*.local
+# Créer le fichier .env_example
+.env_example
+
+# === PYTHON ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# === IDE ===
+.vscode/
+.idea/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+EOF
