@@ -1,3 +1,4 @@
+# models/dataset.py
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
@@ -10,6 +11,7 @@ class Dataset:
     fichier_url: Optional[str] = None
     taille_mb: Optional[Decimal] = None
     format_fichier: Optional[str] = None
+    nb_lignes: Optional[int] = None
     id: Optional[str] = None
     created_at: Optional[datetime] = None
     
@@ -27,6 +29,8 @@ class Dataset:
             data["taille_mb"] = float(self.taille_mb)
         if self.format_fichier:
             data["format_fichier"] = self.format_fichier
+        if self.nb_lignes is not None:
+            data["nb_lignes"] = self.nb_lignes
             
         return data
     
@@ -40,6 +44,7 @@ class Dataset:
             fichier_url=data.get('fichier_url'),
             taille_mb=Decimal(str(data['taille_mb'])) if data.get('taille_mb') else None,
             format_fichier=data.get('format_fichier'),
+            nb_lignes=data.get('nb_lignes'),  # ← AJOUTÉ !
             created_at=data.get('created_at')
         )
     
@@ -64,5 +69,42 @@ class Dataset:
     
     def valider_format(self) -> bool:
         """Valide si le format du fichier est supporté"""
-        formats_supportes = ['csv', 'json', 'parquet', 'xlsx', 'txt']
+        formats_supportes = ['csv', 'json', 'parquet', 'xlsx', 'txt', 'zip']
         return self.format_fichier and self.format_fichier.lower() in formats_supportes
+    
+    def get_info_complete(self) -> str:
+        """Information complète du dataset pour l'affichage"""
+        info = f"{self.nom}"
+        
+        details = []
+        
+        if self.format_fichier:
+            details.append(f"{self.format_fichier}")
+        
+        if self.taille_mb:
+            details.append(f"{self.get_taille_formatee()}")
+        
+        if self.nb_lignes:
+            details.append(f"{self.nb_lignes:,} lignes")
+        
+        if details:
+            info += f" ({', '.join(details)})"
+        
+        return info
+    
+    def est_dataset_images(self) -> bool:
+        """Détermine si c'est un dataset d'images"""
+        formats_images = ['jpg', 'jpeg', 'png', 'bmp', 'tiff', 'zip']  # ZIP peut contenir des images
+        return self.format_fichier and self.format_fichier.lower() in formats_images
+    
+    def est_dataset_textuel(self) -> bool:
+        """Détermine si c'est un dataset textuel"""
+        formats_texte = ['csv', 'json', 'txt', 'tsv']
+        return self.format_fichier and self.format_fichier.lower() in formats_texte
+    
+    def calculer_taille_par_ligne(self) -> Optional[float]:
+        """Calcule la taille moyenne par ligne en KB"""
+        if self.taille_mb and self.nb_lignes and self.nb_lignes > 0:
+            taille_kb = float(self.taille_mb) * 1024
+            return round(taille_kb / self.nb_lignes, 2)
+        return None

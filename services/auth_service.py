@@ -56,6 +56,30 @@ class AuthService:
                 "success": False,
                 "message": f"Erreur connexion: {str(e)}"
             }
+
+    @staticmethod
+    def connexion_anonyme() -> Dict:
+        """Connexion anonyme pour les démos"""
+        try:
+            response = supabase.auth.sign_in_anonymously()
+            
+            if response.user:
+                return {
+                    "success": True,
+                    "user": response.user,
+                    "message": "Connexion anonyme réussie"
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "Erreur connexion anonyme"
+                }
+                
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Erreur auth anonyme: {str(e)}"
+            }
     
     @staticmethod
     def deconnecter_utilisateur() -> bool:

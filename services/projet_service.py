@@ -3,11 +3,23 @@ from config.database import supabase
 from models.projet import ProjetIA
 
 class ProjetService:
-    
+
     @staticmethod
-    def creer_projet(projet: ProjetIA, user_id: str) -> ProjetIA:
-        """Créer un nouveau projet IA"""
+    def creer_projet_ia(projet: ProjetIA, user_id: str) -> ProjetIA:
+        """Création avec validation métier"""
         try:
+            # Validation business
+            if not projet.nom.strip():
+                raise ValueError("Le nom du projet est obligatoire")
+            
+            if projet.type_modele not in ['NLP', 'Computer Vision', 'ML', 'Deep Learning']:
+                raise ValueError("Type de modèle non supporté")
+            
+            # Validation des hyperparamètres
+            if projet.hyperparametres:
+                if not isinstance(projet.hyperparametres, dict):
+                    raise ValueError("Les hyperparamètres doivent être un dictionnaire")
+            
             data = projet.to_dict()
             data['created_by'] = user_id
             
@@ -16,11 +28,11 @@ class ProjetService:
             if response.data:
                 return ProjetIA.from_dict(response.data[0])
             else:
-                raise Exception("Erreur lors de la création du projet")
+                raise Exception("Erreur lors de la création")
                 
         except Exception as e:
-            raise Exception(f"Erreur service: {str(e)}")
-    
+            raise Exception(f"Erreur service création: {str(e)}")
+
     @staticmethod
     def lister_projets(user_id: str) -> List[ProjetIA]:
         """Lister tous les projets d'un utilisateur"""
@@ -85,3 +97,52 @@ class ProjetService:
             
         except Exception as e:
             raise Exception(f"Erreur recherche: {str(e)}")
+
+    @staticmethod
+    def statistiques_projets(user_id: str) -> dict:
+        """Analytics en temps réel des projets"""
+        try:
+            # Requête pour récupérer tous les projets de l'utilisateur
+            if user_id:
+                response = supabase.table('projets_ia')\
+                    .select('type_modele, statut')\
+                    .eq('created_by', user_id)\
+                    .execute()
+            else:
+                response = supabase.table('projets_ia')\
+                    .select('type_modele, statut')\
+                    .order('created_at', desc=True)\
+                    .limit(10)\
+                    .execute()
+            
+            if not response.data:
+                return {"total": 0, "par_type": {}, "par_statut": {}, "type_favori": None}
+            
+            # Calculs des statistiques
+            par_type = {}
+            par_statut = {}
+            
+            for projet in response.data:
+                type_modele = projet['type_modele']
+                statut = projet['statut']
+                
+                # Compter par type
+                par_type[type_modele] = par_type.get(type_modele, 0) + 1
+                
+                # Compter par statut
+                par_statut[statut] = par_statut.get(statut, 0) + 1
+            
+            # Trouver le type favori
+            type_favori = None
+            if par_type:
+                type_favori = max(par_type.items(), key=lambda x: x[1])[0]
+            
+            return {
+                "total": len(response.data),
+                "par_type": par_type,
+                "par_statut": par_statut,
+                "type_favori": type_favori
+            }
+            
+        except Exception as e:
+            raise Exception(f"Erreur calcul statistiques: {str(e)}")

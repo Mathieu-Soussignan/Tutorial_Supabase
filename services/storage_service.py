@@ -22,7 +22,7 @@ class StorageService:
         return None
     
     @staticmethod
-    def lister_fichiers(bucket: str = "datasets") -> List[Dict]:
+    def lister_fichiers(bucket: str = "datasets") -> List[dict]:
         """Lister les fichiers d'un bucket"""
         try:
             response = supabase.storage.from_(bucket).list()

@@ -1,7 +1,10 @@
+# services/dataset_service.py
 from typing import List, Optional, Dict
 from config.database import supabase
 from models.dataset import Dataset
 import os
+from datetime import datetime
+from decimal import Decimal
 
 class DatasetService:
     
@@ -65,7 +68,7 @@ class DatasetService:
                 nom=nom_dataset,
                 projet_id=projet_id,
                 fichier_url=fichier_url,
-                taille_mb=taille_mb,
+                taille_mb=Decimal(str(taille_mb)),
                 format_fichier=format_fichier
             )
             
@@ -118,24 +121,31 @@ class DatasetService:
                 return {
                     "nombre_datasets": 0,
                     "taille_totale_mb": 0,
+                    "taille_totale_formatee": "0 MB",
                     "formats": {},
                     "dataset_plus_gros": None
                 }
             
             # Calculs statistiques
-            taille_totale = sum(d.taille_mb or 0 for d in datasets)
+            taille_totale = sum(float(d.taille_mb or 0) for d in datasets)
             formats = {}
-            dataset_plus_gros = max(datasets, key=lambda d: d.taille_mb or 0)
+            dataset_plus_gros = max(datasets, key=lambda d: float(d.taille_mb or 0))
             
             # Comptage des formats
             for dataset in datasets:
                 format_fichier = dataset.format_fichier or "inconnu"
                 formats[format_fichier] = formats.get(format_fichier, 0) + 1
             
+            # Formatage de la taille
+            if taille_totale >= 1024:
+                taille_formatee = f"{taille_totale/1024:.1f} GB"
+            else:
+                taille_formatee = f"{taille_totale:.1f} MB"
+            
             return {
                 "nombre_datasets": len(datasets),
                 "taille_totale_mb": round(taille_totale, 2),
-                "taille_totale_formatee": f"{taille_totale/1024:.1f} GB" if taille_totale >= 1024 else f"{taille_totale:.1f} MB",
+                "taille_totale_formatee": taille_formatee,
                 "formats": formats,
                 "dataset_plus_gros": {
                     "nom": dataset_plus_gros.nom,
@@ -145,3 +155,40 @@ class DatasetService:
             
         except Exception as e:
             raise Exception(f"Erreur calcul statistiques: {str(e)}")
+    
+    @staticmethod
+    def rechercher_datasets(terme: str, projet_id: str = None) -> List[Dataset]:
+        """Recherche des datasets par nom ou description"""
+        try:
+            query = supabase.table('datasets')\
+                .select('*')\
+                .ilike('nom', f'%{terme}%')
+            
+            if projet_id:
+                query = query.eq('projet_id', projet_id)
+            
+            response = query.execute()
+            
+            return [Dataset.from_dict(item) for item in response.data]
+            
+        except Exception as e:
+            raise Exception(f"Erreur recherche datasets: {str(e)}")
+    
+    @staticmethod
+    def mettre_a_jour_dataset(dataset_id: str, updates: Dict) -> Dataset:
+        """Mettre à jour un dataset"""
+        try:
+            updates['updated_at'] = 'now()'
+            
+            response = supabase.table('datasets')\
+                .update(updates)\
+                .eq('id', dataset_id)\
+                .execute()
+            
+            if response.data:
+                return Dataset.from_dict(response.data[0])
+            else:
+                raise Exception("Dataset non trouvé")
+                
+        except Exception as e:
+            raise Exception(f"Erreur mise à jour dataset: {str(e)}")
