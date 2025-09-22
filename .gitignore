@@ -10,8 +10,6 @@ ENV/
 .env
 .env.local
 .env.*.local
-# Créer le fichier .env_example
-.env_example
 
 # === PYTHON ===
 __pycache__/
