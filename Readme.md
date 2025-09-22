@@ -26,7 +26,7 @@ Cette application illustre les **avantages de PostgreSQL pour les projets de Mac
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Frontend      │◄──► │   Python App    │◄──► │    Supabase      │
+│   Frontend      │◄──► │   Python App    │◄──► │    Supabase     │
 │ (Presentation)  │     │ Models/Services │     │ PostgreSQL+Auth │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
 ```
