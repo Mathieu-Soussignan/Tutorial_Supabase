@@ -1,4 +1,4 @@
-# 🤖 AI Projects Hub - Supabase + Python Tutorial
+# AI Projects Hub - Supabase + Python Tutorial
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
 [![Supabase](https://img.shields.io/badge/Supabase-Backend-green.svg)](https://supabase.com)
@@ -7,11 +7,11 @@
 
 > **Une démonstration complète d'une application de gestion de projets IA utilisant Supabase comme backend et Python comme langage principal.**
 
-## 🎯 À propos du projet
+## À propos du projet
 
 Cette application illustre les **avantages de PostgreSQL pour les projets de Machine Learning** par rapport aux solutions NoSQL traditionnelles. Elle propose un système complet de gestion de projets IA avec authentification, CRUD avancé, et analytics temps réel.
 
-### ✨ Fonctionnalités principales
+### Fonctionnalités principales
 
 - 🔐 **Authentification utilisateur** avec Supabase Auth
 - 📋 **CRUD complet** pour les projets IA (NLP, Computer Vision, Deep Learning)
@@ -22,7 +22,7 @@ Cette application illustre les **avantages de PostgreSQL pour les projets de Mac
 - 📁 **Storage intégré** pour fichiers volumineux
 - 🛡️ **Sécurité** avec Row Level Security (RLS)
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
@@ -39,7 +39,7 @@ Cette application illustre les **avantages de PostgreSQL pour les projets de Mac
 - **Base de données** : PostgreSQL avec JSONB et RLS
 - **Authentification** : JWT tokens avec Supabase Auth
 
-## 🚀 Installation rapide
+## Installation rapide
 
 ### Prérequis
 
