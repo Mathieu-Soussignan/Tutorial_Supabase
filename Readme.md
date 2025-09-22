@@ -252,6 +252,6 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 <div align="center">
 
-**Fait avec ❤️ pour la communauté dev IA Marseille*
+**Fait avec ❤️ par Mathieu Soussignan pour la communauté dev IA Marseille**
 
 </div>
