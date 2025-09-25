@@ -1,4 +1,4 @@
-# config/database.py
+# config/database.py - VERSION COMPLÈTE CORRIGÉE
 import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
@@ -11,28 +11,29 @@ class SupabaseConfig:
         self.anon_key = os.getenv("SUPABASE_KEY")
         self.service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
         
-        if not self.url or not self.anon_key:
-            raise ValueError("SUPABASE_URL et SUPABASE_KEY sont obligatoires")
+        if not self.url:
+            raise ValueError("SUPABASE_URL est obligatoire")
             
-        # Client normal (avec RLS)
-        self.client: Client = create_client(self.url, self.anon_key)
-        
-        # Client admin (bypass RLS)
+        # POUR LA DÉMO : Utiliser service_role qui bypass RLS
         if self.service_key:
-            self.admin_client: Client = create_client(self.url, self.service_key)
+            self.client: Client = create_client(self.url, self.service_key)
+            print("🔧 Mode admin: RLS bypassé pour la démo")
+        elif self.anon_key:
+            self.client: Client = create_client(self.url, self.anon_key)
+            print("🔐 Mode normal: RLS activé")
         else:
-            self.admin_client = self.client  # Fallback
+            raise ValueError("Aucune clé API disponible")
     
-    def get_client(self, admin_mode=False) -> Client:
-        """
-        Récupère le client Supabase
-        admin_mode: True pour bypass RLS (démo uniquement)
-        """
-        if admin_mode and hasattr(self, 'admin_client'):
-            return self.admin_client
+    def get_client(self) -> Client:
         return self.client
 
 # Instance globale
 supabase_config = SupabaseConfig()
-# Pour la démo, on utilise le mode admin
-supabase = supabase_config.get_client(admin_mode=True)
+
+# FONCTION MANQUANTE : get_supabase_client
+def get_supabase_client() -> Client:
+    """Récupère le client Supabase global"""
+    return supabase_config.get_client()
+
+# Pour compatibilité avec d'anciens imports
+supabase = get_supabase_client()

@@ -1,42 +1,14 @@
-import os
-from typing import Optional, List
-from config.database import supabase
+# services/storage_service.py
+from config.database import get_supabase_client
+import uuid
 
-class StorageService:
-    
-    @staticmethod
-    def uploader_dataset(fichier_path: str, nom_fichier: str, bucket: str = "datasets") -> Optional[str]:
-        """Upload d'un dataset"""
-        try:
-            with open(fichier_path, 'rb') as f:
-                response = supabase.storage.from_(bucket).upload(nom_fichier, f)
-            
-            if response:
-                # Récupérer l'URL publique
-                url = supabase.storage.from_(bucket).get_public_url(nom_fichier)
-                return url
-            
-        except Exception as e:
-            raise Exception(f"Erreur upload: {str(e)}")
-        
-        return None
-    
-    @staticmethod
-    def lister_fichiers(bucket: str = "datasets") -> List[dict]:
-        """Lister les fichiers d'un bucket"""
-        try:
-            response = supabase.storage.from_(bucket).list()
-            return response
-            
-        except Exception as e:
-            raise Exception(f"Erreur listage: {str(e)}")
-    
-    @staticmethod
-    def supprimer_fichier(nom_fichier: str, bucket: str = "datasets") -> bool:
-        """Supprimer un fichier"""
-        try:
-            response = supabase.storage.from_(bucket).remove([nom_fichier])
-            return len(response) > 0
-            
-        except Exception as e:
-            raise Exception(f"Erreur suppression: {str(e)}")
+supabase = get_supabase_client()
+BUCKET = "datasets"
+
+def upload_file(file_stream, filename: str, content_type: str = None):
+    key = f"{uuid.uuid4()}_{filename}"
+    res = supabase.storage.from_(BUCKET).upload(key, file_stream, {"content-type": content_type} if content_type else None)
+    if res.get("error"):
+        raise Exception(res["error"])
+    public_url = supabase.storage.from_(BUCKET).get_public_url(key)
+    return {"key": key, "public_url": public_url}
